@@ -1,0 +1,76 @@
+import java.util.concurrent.Semaphore;
+
+public class ProducerConsumer {
+
+    // Buffer and size
+    static final int SIZE = 5;
+    static int[] buffer = new int[SIZE];
+    static int in = 0, out = 0;
+
+    // Semaphores
+    static Semaphore emptySlots = new Semaphore(SIZE);
+ // initially all empty
+    static Semaphore fullSlots = new Semaphore(0);
+      // initially no full slots
+    static Semaphore mutex = new Semaphore(1);
+          // for mutual exclusion
+
+    // Producer Class
+    static class Producer extends Thread {
+        public void run() {
+            int item = 1;
+            try {
+                while (true) {
+                    emptySlots.acquire(); // wait for empty slot
+                    mutex.acquire();      // enter critical section
+
+                    buffer[in] = item;
+                    System.out.println("Produced: " + item + " at index " + in);
+                    in = (in + 1) % SIZE;
+                    item++;
+
+                    mutex.release();      // exit critical section
+                    fullSlots.release();  // signal that one item is produced
+
+                    Thread.sleep(1000);   // simulate time
+                }
+            } catch (InterruptedException e) {
+                System.out.println("Producer Interrupted");
+            }
+        }
+    }
+
+    // Consumer Class
+    static class Consumer extends Thread {
+        public void run() {
+            try {
+                while (true) {
+                    fullSlots.acquire();  // wait for full slot
+                    mutex.acquire();      // enter critical section
+
+                    int item = buffer[out];
+                    System.out.println("Consumed: " + item + " from index " + out);
+                    out = (out + 1) % SIZE;
+
+                    mutex.release();      // exit critical section
+                    emptySlots.release(); // signal that one slot is empty
+
+                    Thread.sleep(1500);   // simulate time
+                }
+            } catch (InterruptedException e) {
+                System.out.println("Consumer Interrupted");
+            }
+        }
+    }
+
+    // Main method
+    public static void main(String[] args) {
+        System.out.println("Abdul Qadeer - 43");
+
+        Producer producer = new Producer();
+        Consumer consumer = new Consumer();
+
+        producer.start();
+        consumer.start();
+    }
+}
