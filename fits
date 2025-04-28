@@ -1,0 +1,129 @@
+
+
+#include <stdio.h>
+#include <stdbool.h>
+
+#define MAX_BLOCKS 5
+#define MAX_PROCESSES 4
+
+// Structure to represent a memory block
+typedef struct {
+    int id;
+    int size;
+    bool allocated;
+} Block;
+
+// Structure to represent a process
+typedef struct {
+    int id;
+    int size;
+    int allocatedBlock; // Stores allocated block ID (-1 if not allocated)
+} Process;
+
+// Function to perform First-Fit allocation
+void firstFit(Block blocks[], int blockCount, Process processes[], int processCount) {
+    for (int i = 0; i < processCount; i++) {
+        for (int j = 0; j < blockCount; j++) {
+            if (!blocks[j].allocated && blocks[j].size >= processes[i].size) {
+                processes[i].allocatedBlock = blocks[j].id;
+                blocks[j].allocated = true;
+                break;
+            }
+        }
+    }
+}
+
+// Function to perform Best-Fit allocation
+void bestFit(Block blocks[], int blockCount, Process processes[], int processCount) {
+    for (int i = 0; i < processCount; i++) {
+        int bestIdx = -1;
+        for (int j = 0; j < blockCount; j++) {
+            if (!blocks[j].allocated && blocks[j].size >= processes[i].size) {
+                if (bestIdx == -1 || blocks[j].size < blocks[bestIdx].size) {
+                    bestIdx = j;
+                }
+            }
+        }
+        if (bestIdx != -1) {
+            processes[i].allocatedBlock = blocks[bestIdx].id;
+            blocks[bestIdx].allocated = true;
+        }
+    }
+}
+
+// Function to perform Worst-Fit allocation
+void worstFit(Block blocks[], int blockCount, Process processes[], int processCount) {
+    for (int i = 0; i < processCount; i++) {
+        int worstIdx = -1;
+        for (int j = 0; j < blockCount; j++) {
+            if (!blocks[j].allocated && blocks[j].size >= processes[i].size) {
+                if (worstIdx == -1 || blocks[j].size > blocks[worstIdx].size) {
+                    worstIdx = j;
+                }
+            }
+        }
+        if (worstIdx != -1) {
+            processes[i].allocatedBlock = blocks[worstIdx].id;
+            blocks[worstIdx].allocated = true;
+        }
+    }
+}
+
+// Function to reset memory blocks for reuse
+void resetBlocks(Block blocks[], int blockCount) {
+    for (int i = 0; i < blockCount; i++) {
+        blocks[i].allocated = false;
+    }
+}
+
+// Function to display the allocation result
+void displayAllocation(Process processes[], int processCount, const char* algorithm) {
+    printf("\n%s Allocation:\n", algorithm);
+    printf("Process ID\tProcess Size\tAllocated Block\n");
+    for (int i = 0; i < processCount; i++) {
+        printf("%d\t\t%d\t\t", processes[i].id, processes[i].size);
+        if (processes[i].allocatedBlock != -1)
+            printf("Block %d\n", processes[i].allocatedBlock);
+        else
+            printf("Not Allocated\n");
+    }
+}
+
+int main() {
+    // Define memory blocks
+    Block blocks[MAX_BLOCKS] = {
+        {1, 100, false}, {2, 500, false}, {3, 200, false},
+        {4, 300, false}, {5, 600, false}
+    };
+
+    // Define processes
+    Process processes[MAX_PROCESSES] = {
+        {1, 212, -1}, {2, 417, -1}, {3, 112, -1}, {4, 426, -1}
+    };
+	
+    //Run By
+    printf("Abdul Qadeer - D10B/43\n");
+
+    // Apply First-Fit algorithm
+    firstFit(blocks, MAX_BLOCKS, processes, MAX_PROCESSES);
+    displayAllocation(processes, MAX_PROCESSES, "First-Fit");
+
+    // Reset memory blocks and processes
+    resetBlocks(blocks, MAX_BLOCKS);
+    for (int i = 0; i < MAX_PROCESSES; i++) processes[i].allocatedBlock = -1;
+
+    // Apply Best-Fit algorithm
+    bestFit(blocks, MAX_BLOCKS, processes, MAX_PROCESSES);
+    displayAllocation(processes, MAX_PROCESSES, "Best-Fit");
+
+    // Reset memory blocks and processes
+    resetBlocks(blocks, MAX_BLOCKS);
+    for (int i = 0; i < MAX_PROCESSES; i++) processes[i].allocatedBlock = -1;
+
+    // Apply Worst-Fit algorithm
+    worstFit(blocks, MAX_BLOCKS, processes, MAX_PROCESSES);
+    displayAllocation(processes, MAX_PROCESSES, "Worst-Fit");
+
+    return 0;
+}
+
