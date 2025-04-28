@@ -1,0 +1,65 @@
+
+
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX 10
+
+// A structure to represent a process
+struct Process {
+    int id;
+    int BT;  // Burst Time
+    int WT;  // Waiting Time
+    int TA;  // Turnaround Time
+    int priority;
+};
+
+int main() {
+    struct Process p[MAX];
+    int nop, sumWT = 0, sumTAT = 0;
+    float avgWT, avgTAT;
+
+    printf("Enter Number of Processes: ");
+    scanf("%d", &nop);
+
+    for (int i = 0; i < nop; i++) {
+        p[i].id = i + 1;
+        printf("Enter Burst Time for Process %d: ", p[i].id);
+        scanf("%d", &p[i].BT);
+        printf("Enter Priority for Process %d (lower number means higher priority): ", p[i].id);
+        scanf("%d", &p[i].priority);
+    }
+
+    // Sorting processes by priority (smallest priority number comes first)
+    for (int i = 0; i < nop - 1; i++) {
+        for (int j = i + 1; j < nop; j++) {
+            if (p[i].priority > p[j].priority) {
+                struct Process temp = p[i];
+                p[i] = p[j];
+                p[j] = temp;
+            }
+        }
+    }
+
+    // Calculating Waiting Time and Turnaround Time
+    p[0].WT = 0;
+    p[0].TA = p[0].BT;
+    sumTAT = p[0].TA;
+
+    for (int i = 1; i < nop; i++) {
+        p[i].WT = p[i - 1].WT + p[i - 1].BT;
+        p[i].TA = p[i].WT + p[i].BT;
+        sumWT += p[i].WT;
+        sumTAT += p[i].TA;
+    }
+
+
+
+    avgWT = (float)sumWT / nop;
+    avgTAT = (float)sumTAT / nop;
+
+    printf("\nAverage Waiting Time: %.2f\n", avgWT);
+    printf("Average Turnaround Time: %.2f\n", avgTAT);
+
+    return 0;
+}
